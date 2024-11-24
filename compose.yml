@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     container_name: sqlite_db
@@ -19,7 +17,10 @@ services:
       dockerfile: Dockerfile
     networks:
       - mynet
-    command: streamlit run app.py
+    volumes:
+      - ./frontend:/frontend/
+    ports:
+      - "8501:8501"
 
 volumes:
   sqlite_data:
