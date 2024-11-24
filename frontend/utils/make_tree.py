@@ -1,12 +1,20 @@
 import math
+from random import randint
 
 from matplotlib import figure
 from matplotlib import pyplot as plt
+from matplotlib.colors import to_rgb
 
 from .utilities import load_streamlit_config
 
 
-def make_tree(n: int, pattern: list[str]) -> figure.Figure:
+def get_alpha(chance: int = 1):
+    return int(randint(1, chance) == 1)
+
+
+def make_tree(
+    n: int, pattern: list[str], alpha: int = 1, sparkle: int = 1
+) -> figure.Figure:
     rows = []
     gaps = []
 
@@ -15,7 +23,9 @@ def make_tree(n: int, pattern: list[str]) -> figure.Figure:
         rows.append(i * 2)
         i += 1
 
-    colours = (pattern * math.ceil((sum(rows) / len(pattern))))[: sum(rows)]
+    base_colours = (pattern * math.ceil((sum(rows) / len(pattern))))[: sum(rows)]
+
+    colours = [(*to_rgb(colour), get_alpha(sparkle) * alpha) for colour in base_colours]
 
     gaps = [(max(rows) - item) / 2 for item in rows]
 
@@ -40,10 +50,9 @@ def make_tree(n: int, pattern: list[str]) -> figure.Figure:
     triangle_x = [-2, (max(rows) + min(gaps) - 1) / 2, max(rows)]  # Base, peak, base
     triangle_y = [-1, max(rows) + 2, -1]  # Bottom left, top center, bottom right
     ax.fill(triangle_x, triangle_y, color="green", alpha=0.7)
-
-    ax.scatter(x, y, c=colours)
     ax.axis("off")
     ax.margins(0)
     plt.subplots_adjust(left=00, right=1, top=1, bottom=0)
+    ax.scatter(x, y, c=colours)
     return fig
     return fig

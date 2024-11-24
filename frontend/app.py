@@ -1,4 +1,8 @@
+import math
+import time
+
 import streamlit as st
+from matplotlib import pyplot as plt
 from utils.make_tree import make_tree
 
 
@@ -12,9 +16,42 @@ def run():
         st.session_state.n_leds = st.number_input(
             label="LEDs: ", min_value=1, value=st.session_state.n_leds, step=1
         )
-        st.pyplot(
-            make_tree(st.session_state.n_leds, st.session_state.pattern["pattern"])
-        )
+        tree_fig = st.empty()
+
+        def preview(effects, length: int = 5):
+            with tree_fig:
+                start = time.time()
+                alpha = 1
+                pattern = list(st.session_state.pattern["pattern"])
+                sparkle = 1
+                while time.time() - start < length:
+                    if effects["breathing"]:
+                        alpha = (math.sin(time.time() * 3) + 1) / 2
+                    if effects["chasing"]:
+                        last = pattern.pop(-1)
+                        pattern = [last] + pattern
+                    if effects["sparkle"]:
+                        sparkle = 5
+                    fig = make_tree(
+                        st.session_state.n_leds, pattern, alpha=alpha, sparkle=5
+                    )
+                    st.pyplot(
+                        fig,
+                        clear_figure=True,
+                    )
+                    plt.close(fig)
+                    time.sleep(0.02)
+
+        with tree_fig:
+            fig = make_tree(
+                st.session_state.n_leds,
+                st.session_state.pattern["pattern"],
+                alpha=1,
+            )
+            st.pyplot(
+                fig,
+                clear_figure=True,
+            )
 
     with user_col:
         st.header("Make a pattern")
@@ -53,6 +90,7 @@ def run():
 
         pattern = {"name": pattern_name, "pattern": colours, "effects": effects}
         st.session_state.pattern = pattern
+        st.button("Preview", on_click=preview, args=(effects, 3))
 
         # save_effect = st.form_submit_button("Save pattern")
 

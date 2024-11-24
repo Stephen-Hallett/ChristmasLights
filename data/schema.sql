@@ -5,7 +5,7 @@ CREATE TABLE patterns (
 );
 
 CREATE TABLE effects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     breathing INTEGER NOT NULL,
     chasing INTEGER NOT NULL,
     sparkle INTEGER NOT NULL
