@@ -9,12 +9,21 @@ services:
     volumes:
       - ./data:/data/
     networks:
-      - mynet3
+      - mynet
     command: sh -c "test -f /data/app.db || sqlite3 /data/app.db < /data/schema.sql && tail -f /dev/null"
+
+  frontend:
+    container_name: Streamlit
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks:
+      - mynet
+    command: streamlit run app.py
 
 volumes:
   sqlite_data:
 
 networks:
-  mynet3:
+  mynet:
     driver: bridge
