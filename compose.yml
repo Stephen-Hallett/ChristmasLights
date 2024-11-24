@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: sqlite_db
+    build:
+      context: ./data
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/data/
+    networks:
+      - mynet3
+    command: sh -c "test -f /data/app.db || sqlite3 /data/app.db < /data/schema.sql && tail -f /dev/null"
+
+volumes:
+  sqlite_data:
+
+networks:
+  mynet3:
+    driver: bridge
