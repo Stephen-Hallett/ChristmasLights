@@ -90,7 +90,7 @@ def run():
 
         pattern = {"name": pattern_name, "pattern": colours, "effects": effects}
         st.session_state.pattern = pattern
-        st.button("Preview", on_click=preview, args=(effects, 3))
+        st.button("Preview", on_click=preview, args=(effects, 5))
 
 
 def main():

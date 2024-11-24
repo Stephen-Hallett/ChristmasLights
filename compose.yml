@@ -10,6 +10,19 @@ services:
       - mynet
     command: sh -c "test -f /data/app.db || sqlite3 /data/app.db < /data/schema.sql && tail -f /dev/null"
 
+  backend:
+    container_name: FastAPI
+    depends_on:
+      - sqlite_db
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    networks:
+      - mynet
+    volumes:
+      - ./backend:/backend/
+      - ./data/app.db:/data/app.db
+
   frontend:
     container_name: Streamlit
     build:
