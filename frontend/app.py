@@ -33,7 +33,7 @@ def run():
                     if effects["sparkle"]:
                         sparkle = 5
                     fig = make_tree(
-                        st.session_state.n_leds, pattern, alpha=alpha, sparkle=5
+                        st.session_state.n_leds, pattern, alpha=alpha, sparkle=sparkle
                     )
                     st.pyplot(
                         fig,
@@ -76,23 +76,21 @@ def run():
 
         colours = ["#FFFFFF"] * pattern_length
 
-        colour_cols = st.columns(pattern_length)
-
-        for i in range(pattern_length):
-            with colour_cols[i]:
-                colours[i] = st.color_picker(
-                    label=" ",
-                    label_visibility="hidden",
-                    key=f"pattern_colour{i}",
-                    value="#FFFFFF",
-                )
+        with st.container(key="colourbox"):
+            colour_cols = st.columns(pattern_length)
+            for i in range(pattern_length):
+                with colour_cols[i]:
+                    colours[i] = st.color_picker(
+                        label=" ",
+                        label_visibility="hidden",
+                        key=f"pattern_colour{i}",
+                        value="#FFFFFF",
+                    )
         st.divider()
 
         pattern = {"name": pattern_name, "pattern": colours, "effects": effects}
         st.session_state.pattern = pattern
         st.button("Preview", on_click=preview, args=(effects, 3))
-
-        # save_effect = st.form_submit_button("Save pattern")
 
 
 def main():
@@ -121,6 +119,7 @@ def main():
     st.session_state["effects"] = st.session_state.get(
         "effects", set(st.session_state.pattern["effects"].keys())
     )
+    st.html("static/style.css.html")
     run()
 
 
