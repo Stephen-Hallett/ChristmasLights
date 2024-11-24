@@ -1,1 +1,1 @@
-![Example](.media/example.mp4)
+![Example](.media/example.gif)
