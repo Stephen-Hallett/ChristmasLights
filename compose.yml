@@ -5,10 +5,12 @@ services:
       context: ./data
       dockerfile: Dockerfile
     volumes:
-      - ./data:/data/
+      - type: bind
+        source: ./data
+        target: /data/
     networks:
       - mynet
-    command: sh -c "test -f /data/app.db || sqlite3 /data/app.db < /data/schema.sql && tail -f /dev/null"
+
 
   backend:
     container_name: FastAPI
@@ -40,7 +42,7 @@ services:
       - "8501:8501"
 
 volumes:
-  sqlite_data:
+  data:
 
 networks:
   mynet:

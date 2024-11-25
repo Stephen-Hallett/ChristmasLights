@@ -7,5 +7,7 @@ RUN apt-get install -y sqlite3 libsqlite3-dev
 WORKDIR /data
 
 COPY schema.sql /data/
+COPY entrypoint.sh /data/
+RUN chmod +x /data/entrypoint.sh
 
-RUN sqlite3 app.db < schema.sql
+ENTRYPOINT ["/data/entrypoint.sh"]
