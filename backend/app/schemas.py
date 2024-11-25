@@ -1,13 +1,16 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
-class Effect(BaseModel):
-    breathing: int
-    chasing: int
+class Effects(BaseModel):
+    breathing: float
+    chasing: float
     sparkle: int
 
 
 class Pattern(BaseModel):
+    id: Optional[int] = None
     name: str
     pattern: list
-    effects: Effect
+    effects: Effects

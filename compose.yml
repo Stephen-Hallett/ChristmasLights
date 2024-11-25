@@ -11,7 +11,6 @@ services:
     networks:
       - mynet
 
-
   backend:
     container_name: FastAPI
     depends_on:
@@ -23,8 +22,16 @@ services:
     networks:
       - mynet
     volumes:
-      - ./backend:/backend/
-      - ./data/app.db:/data/app.db
+      - type: bind
+        source: ./backend
+        target: /backend/
+      - type: bind
+        source: ./data
+        target: /data/
+    environment:
+      - DATABASE_PATH=/data/app.db
+    ports:
+      - "80:80"
 
   frontend:
     container_name: Streamlit
@@ -43,6 +50,7 @@ services:
 
 volumes:
   data:
+  backend:
 
 networks:
   mynet:

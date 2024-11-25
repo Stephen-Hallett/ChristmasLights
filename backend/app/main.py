@@ -21,3 +21,18 @@ con = Controller()
 @app.post("/patterns/save")
 def save_pattern(pattern: schemas.Pattern) -> str:
     return con.save_pattern(pattern=pattern)
+
+
+@app.get("/patterns/list")
+def list_patterns() -> list[schemas.Pattern]:
+    return con.list_patterns()
+
+
+@app.get("/patterns/get/{id}")
+def get_pattern(id: int) -> schemas.Pattern:
+    return con.get_pattern(id)
+
+
+@app.get("/test")
+def test() -> str:
+    return "What up big dog"
