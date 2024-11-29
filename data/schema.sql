@@ -2,7 +2,7 @@ CREATE TABLE Patterns (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
     pattern TEXT NOT NULL,
-    active INTEGER NOT NULL
+    active INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX one_active_pattern ON Patterns(active) WHERE active = 1;
