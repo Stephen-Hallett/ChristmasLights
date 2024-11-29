@@ -34,6 +34,11 @@ class Controller:
         effect_item_sorted = {key: effect_item[key] for key in sorted(effect_item)}
 
         return tuple(pattern_sorted.values()), tuple(effect_item_sorted.values())
+    
+    def _clear_active(self, cursor) -> None:
+        cursor.execute(
+            "UPDATE Patterns SET active = 0 WHERE active = 1"
+        )
 
     def update_pattern(self, pattern: schemas.Pattern) -> str:
         id_val = pattern.id
@@ -42,6 +47,8 @@ class Controller:
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
+        if active:
+            self._clear_active(cursor)
         cursor.execute(
             "UPDATE Patterns SET name = ?, pattern = ?, active = ? WHERE id = ?", (name, patt, active, id_val)
         )
@@ -59,6 +66,8 @@ class Controller:
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
+        if active:
+            self._clear_active(cursor)
         cursor.execute(
             "INSERT INTO Patterns (name, pattern, active) VALUES (?, ?, ?)", (name,  patt, active)
         )
