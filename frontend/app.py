@@ -4,9 +4,23 @@ import time
 import streamlit as st
 from matplotlib import pyplot as plt
 from utils.make_tree import make_tree
+import requests
+import os
 
+def save_pattern() -> None:
+    res = requests.post(f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/save", json=st.session_state.pattern)
+    if res.status_code == 200:
+        st.success(res.text)
+    else:
+        st.error(f"Error {'Updat' if 'id' in st.session_state.pattern else 'Sav'}ing pattern \"{st.session_state.pattern["name"]}\"")
 
 def run():
+    # patterns = hit backend API to retrieve from db
+    st.session_state["patterns"] = requests.get(f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/list").json()
+    st.session_state.patterns.append(st.session_state.blank_pattern)
+
+    st.session_state["active"] = requests.get(f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/active").json()
+
     st.title("Christmas Lights Controller")
     st.divider()
 
@@ -42,6 +56,52 @@ def run():
                     plt.close(fig)
                     time.sleep(0.02)
 
+    with user_col:
+        st.header("Pattern Menu")
+
+        st.session_state.pattern = st.selectbox("Pattern to edit", 
+                                                options=st.session_state.patterns, 
+                                                index = st.session_state.patterns.index(st.session_state.active),
+                                                format_func = lambda x: x["name"])
+
+        details_col, _, effects_col = st.columns([6, 1, 2])
+        with details_col:
+            current = st.session_state.pattern
+            current["name"] = st.text_input(
+                "Pattern name:", value=current["name"]
+            )
+            pattern_length = st.number_input(
+                label="Pattern length",
+                min_value=1,
+                max_value=st.session_state.n_leds,
+                value=len(current["pattern"]),
+            )
+
+        with effects_col:
+            st.subheader("Effects")
+            for eff in st.session_state.effects:
+                current["effects"][eff] = st.number_input(eff, min_value=0 if isinstance(current["effects"][eff], int) else 0.0, value=current["effects"][eff])
+        st.divider()
+
+        current["pattern"] = [current["pattern"][i] if i < len(current["pattern"]) else "#000000" for i in range(pattern_length)]
+
+        with st.container(key="colourbox"):
+            colour_cols = st.columns(pattern_length)
+            for i in range(pattern_length):
+                with colour_cols[i]:
+                    current["pattern"][i] = st.color_picker(
+                        label=" ",
+                        label_visibility="hidden",
+                        key=f"pattern_colour{i}",
+                        value=current["pattern"][i],
+                    )
+        st.divider()
+
+        st.button(f"{'Update' if 'id' in current else 'Save'} pattern", use_container_width=True, type="primary", on_click=save_pattern)
+
+        st.button("Preview", on_click=preview, args=(current["effects"], 5))
+
+    with tree_col:
         with tree_fig:
             fig = make_tree(
                 st.session_state.n_leds,
@@ -53,68 +113,22 @@ def run():
                 clear_figure=True,
             )
 
-    with user_col:
-        st.header("Make a pattern")
-        details_col, _, effects_col = st.columns([6, 1, 2])
-        with details_col:
-            pattern_name = st.text_input(
-                "Pattern name:", value=f"Pattern{len(st.session_state.patterns)+1}"
-            )
-            pattern_length = st.number_input(
-                label="Pattern length",
-                min_value=1,
-                max_value=st.session_state.n_leds,
-                value=1,
-            )
-
-        with effects_col:
-            st.subheader("Effects")
-            effects = {}
-            for eff in st.session_state.effects:
-                effects[eff] = st.checkbox(eff, value=False)
-        st.divider()
-
-        colours = ["#FFFFFF"] * pattern_length
-
-        with st.container(key="colourbox"):
-            colour_cols = st.columns(pattern_length)
-            for i in range(pattern_length):
-                with colour_cols[i]:
-                    colours[i] = st.color_picker(
-                        label=" ",
-                        label_visibility="hidden",
-                        key=f"pattern_colour{i}",
-                        value="#FFFFFF",
-                    )
-        st.divider()
-
-        pattern = {"name": pattern_name, "pattern": colours, "effects": effects}
-        st.session_state.pattern = pattern
-        st.button("Preview", on_click=preview, args=(effects, 5))
-
 
 def main():
     st.set_page_config(layout="wide")
     # Set state variables
-    st.session_state["n_leds"] = st.session_state.get("n_leds", 100)
-    # patterns = hit backend API to retrieve from db
-    st.session_state["patterns"] = st.session_state.get(
-        "patterns",
-        [
-            {
-                "name": "Candy Cane",
-                "pattern": ["#FFFFFF", "#ff2921"],
-                "effects": {"breathing": False, "chasing": True, "sparkle": False},
-            }
-        ],
-    )
+    st.session_state["n_leds"] = int(st.session_state.get("n_leds", os.environ.get("N_LEDS", 100)))
+    st.session_state["blank_pattern"] = st.session_state.get("blank_pattern", {"name": "New Pattern",
+                                                                               "pattern": ["#000000"],
+                                                                               "active": False,
+                                                                               "effects": {
+                                                                                   "breathing": 0,
+                                                                                   "chasing": 0,
+                                                                                   "sparkle": 0
+                                                                               }})
     st.session_state["pattern"] = st.session_state.get(
         "pattern",
-        {
-            "name": "Candy Cane",
-            "pattern": ["#FFFFFF", "#ff2921"],
-            "effects": {"breathing": False, "chasing": True, "sparkle": False},
-        },
+        requests.get(f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/active").json(),
     )
     st.session_state["effects"] = st.session_state.get(
         "effects", set(st.session_state.pattern["effects"].keys())
