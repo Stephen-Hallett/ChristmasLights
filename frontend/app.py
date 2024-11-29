@@ -55,10 +55,10 @@ def run():
                     )
                     plt.close(fig)
                     time.sleep(0.02)
+    time.sleep(0.05)
 
     with user_col:
         st.header("Pattern Menu")
-        print(st.session_state.patterns)
         st.session_state.pattern = st.selectbox("Pattern to edit", 
                                                 options=st.session_state.patterns, 
                                                 index = st.session_state.patterns.index(st.session_state.active),
@@ -77,6 +77,7 @@ def run():
                 value=len(current["pattern"]),
             )
 
+            st.html("<br/>")
             current["active"] = st.toggle("Activate pattern", value = current["active"])
 
         with effects_col:
