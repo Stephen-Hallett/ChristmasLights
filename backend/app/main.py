@@ -23,6 +23,8 @@ con = Controller()
 def save_pattern(pattern: schemas.Pattern) -> str:
     if pattern.id is not None:
         if pattern.id == 1:
+            if pattern.active: # Only allow turning off, no other edits
+                return con.turn_off()
             return "You cannot modify the \"Off\" pattern"
         return con.update_pattern(pattern=pattern)
     return con.save_pattern(pattern=pattern)

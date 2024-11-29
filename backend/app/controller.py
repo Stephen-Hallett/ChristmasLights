@@ -113,10 +113,23 @@ class Controller:
             cursor.execute(
             "UPDATE Patterns SET active = 1 WHERE id = 1"
             )
+            conn.commit()
             cursor.execute(
                 "SELECT * FROM (Patterns INNER JOIN Effects USING(id)) WHERE id = 1"
             )
             res = cursor.fetchone()
         conn.close()
         return self._make_pattern_dict(res)
+    
+    def turn_off(self) -> str:
+        conn = self.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        self._clear_active(cursor)
+        cursor.execute(
+            "UPDATE Patterns SET active = 1 WHERE id = 1"
+        )
+        conn.commit()
+        conn.close()
+        return "Lights are turned off"
 
