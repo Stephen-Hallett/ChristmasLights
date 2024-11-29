@@ -58,7 +58,7 @@ class Controller:
         )
         conn.commit()
         conn.close()
-        return f"Pattern #{id_val} updated."
+        return f"Pattern \"{name}\" updated."
 
     def save_pattern(self, pattern: schemas.Pattern) -> str:
         pattern_values, effect_values = self._make_db_row(pattern)
@@ -78,7 +78,7 @@ class Controller:
         )
         conn.commit()
         conn.close()
-        return f"Pattern #{last_id} saved."
+        return f"Pattern \"{name}\" saved."
 
     def list_patterns(self) -> list:
         conn = self.get_connection()
