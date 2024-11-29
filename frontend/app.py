@@ -77,6 +77,8 @@ def run():
                 value=len(current["pattern"]),
             )
 
+            current["active"] = st.toggle("Activate pattern", value = current["active"])
+
         with effects_col:
             st.subheader("Effects")
             for eff in st.session_state.effects:
