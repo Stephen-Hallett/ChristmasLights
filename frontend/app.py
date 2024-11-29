@@ -99,8 +99,6 @@ def run():
 
         st.button(f"{'Update' if 'id' in current else 'Save'} pattern", use_container_width=True, type="primary", on_click=save_pattern)
 
-        st.button("Preview", on_click=preview, args=(current["effects"], 5))
-
     with tree_col:
         with tree_fig:
             fig = make_tree(
@@ -112,6 +110,9 @@ def run():
                 fig,
                 clear_figure=True,
             )
+        _, stump, _ = st.columns([3,4,3])
+        with stump, st.container(key="stump_button"):
+            st.button("Preview", on_click=preview, args=(current["effects"], 5), use_container_width=True)
 
 
 def main():
