@@ -13,4 +13,5 @@ class Pattern(BaseModel):
     id: Optional[int] = None
     name: str
     pattern: list
+    active: bool
     effects: Effects

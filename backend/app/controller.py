@@ -18,13 +18,14 @@ class Controller:
 
     def _make_pattern_dict(self, item: sqlite3.Row) -> dict:
         item = dict(item)
+        item["active"] = bool(item["active"])
         item["pattern"] = json.loads(item["pattern"])
         item["effects"] = {
             key: item.pop(key) for key in schemas.Effects.model_fields.keys()
         }
         return item
 
-    def _make_db_row(self, pattern: schemas.Pattern) -> tuple[dict, dict]:
+    def _make_db_row(self, pattern: schemas.Pattern) -> tuple[tuple, tuple]:
         pattern = pattern.dict()
         pattern.pop("id")
         effect_item = pattern.pop("effects")
@@ -34,13 +35,32 @@ class Controller:
 
         return tuple(pattern_sorted.values()), tuple(effect_item_sorted.values())
 
-    def save_pattern(self, pattern: schemas.Pattern) -> str:
+    def update_pattern(self, pattern: schemas.Pattern) -> str:
+        id_val = pattern.id
         pattern_values, effect_values = self._make_db_row(pattern)
+        active, name, patt = pattern_values
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO Patterns (name, pattern) VALUES (?, ?)", pattern_values
+            "UPDATE Patterns SET name = ?, pattern = ?, active = ? WHERE id = ?", (name, patt, active, id_val)
+        )
+        cursor.execute(
+            "UPDATE Effects SET breathing = ?, chasing = ?, sparkle = ? WHERE id = ?",
+            (*effect_values, id_val),
+        )
+        conn.commit()
+        conn.close()
+        return f"Pattern #{id_val} updated."
+
+    def save_pattern(self, pattern: schemas.Pattern) -> str:
+        pattern_values, effect_values = self._make_db_row(pattern)
+        active, name, patt = pattern_values
+        conn = self.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO Patterns (name, pattern, active) VALUES (?, ?, ?)", (name,  patt, active)
         )
         last_id = cursor.lastrowid
         cursor.execute(
@@ -60,7 +80,7 @@ class Controller:
         conn.close()
         return [self._make_pattern_dict(item) for item in res]
 
-    def get_pattern(self, id: int) -> list:
+    def get_pattern(self, id: int) -> dict:
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -70,3 +90,15 @@ class Controller:
         res = cursor.fetchone()
         conn.close()
         return self._make_pattern_dict(res)
+    
+    def get_active(self) -> dict:
+        conn = self.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM (Patterns INNER JOIN Effects USING(id)) WHERE active = 1"
+        )
+        res = cursor.fetchone()
+        conn.close()
+        return self._make_pattern_dict(res)
+
