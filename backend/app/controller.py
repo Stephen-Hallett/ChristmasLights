@@ -108,6 +108,15 @@ class Controller:
             "SELECT * FROM (Patterns INNER JOIN Effects USING(id)) WHERE active = 1"
         )
         res = cursor.fetchone()
+        if res is None:
+            # If there is no active pattern, set the 'off' pattern to active.
+            cursor.execute(
+            "UPDATE Patterns SET active = 1 WHERE id = 1"
+            )
+            cursor.execute(
+                "SELECT * FROM (Patterns INNER JOIN Effects USING(id)) WHERE id = 1"
+            )
+            res = cursor.fetchone()
         conn.close()
         return self._make_pattern_dict(res)
 

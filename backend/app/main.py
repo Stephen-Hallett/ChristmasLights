@@ -22,6 +22,8 @@ con = Controller()
 @app.post("/patterns/save")
 def save_pattern(pattern: schemas.Pattern) -> str:
     if pattern.id is not None:
+        if pattern.id == 1:
+            return "You cannot modify the \"Off\" pattern"
         return con.update_pattern(pattern=pattern)
     return con.save_pattern(pattern=pattern)
 

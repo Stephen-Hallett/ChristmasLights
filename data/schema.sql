@@ -15,5 +15,5 @@ CREATE TABLE Effects (
     FOREIGN KEY (id) REFERENCES Patterns(id)
 );
 
-INSERT INTO Patterns (name, pattern, active) VALUES ('Candy Cane', '["#FFFFFF", "#ff2612"]', 1);
-INSERT INTO Effects (id, breathing, chasing, sparkle) VALUES (1, 0, 0.5, 1);
+INSERT INTO Patterns (name, pattern, active) VALUES ('Off', '["#000000"]', 1);
+INSERT INTO Effects (id, breathing, chasing, sparkle) VALUES (1, 0, 0, 0);
