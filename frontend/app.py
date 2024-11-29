@@ -58,7 +58,7 @@ def run():
 
     with user_col:
         st.header("Pattern Menu")
-
+        print(st.session_state.patterns)
         st.session_state.pattern = st.selectbox("Pattern to edit", 
                                                 options=st.session_state.patterns, 
                                                 index = st.session_state.patterns.index(st.session_state.active),
