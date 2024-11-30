@@ -5,6 +5,6 @@ COPY . /backend/
 
 RUN pip install -r requirements.txt
 
-EXPOSE 80
+EXPOSE 81
 
-CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+CMD ["fastapi", "run", "app/main.py", "--port", "81"]
