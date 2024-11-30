@@ -45,6 +45,9 @@ services:
       - mynet
     volumes:
       - ./frontend:/frontend/
+    environment:
+      - BACKEND_URL=http://backend:80
+      - N_LEDS=100
     ports:
       - "8501:8501"
 
