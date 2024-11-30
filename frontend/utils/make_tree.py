@@ -8,12 +8,12 @@ from matplotlib.colors import to_rgb
 from .utilities import load_streamlit_config
 
 
-def get_alpha(chance: int = 1):
-    return int(randint(1, chance) == 1)
+def get_sparkle(chance: int = 0):
+    return int(randint(0, chance) == 0)
 
 
 def make_tree(
-    n: int, pattern: list[str], alpha: int = 1, sparkle: int = 1
+    n: int, pattern: list[str], alpha: int = 1, sparkle: int = 0
 ) -> figure.Figure:
     rows = []
     gaps = []
@@ -25,7 +25,7 @@ def make_tree(
 
     base_colours = (pattern * math.ceil((sum(rows) / len(pattern))))[: sum(rows)]
 
-    colours = [(*to_rgb(colour), get_alpha(sparkle) * alpha) for colour in base_colours]
+    colours = [(*to_rgb(colour), get_sparkle(sparkle) * alpha) for colour in base_colours]
 
     gaps = [(max(rows) - item) / 2 for item in rows]
 
@@ -52,7 +52,6 @@ def make_tree(
     ax.fill(triangle_x, triangle_y, color="green", alpha=0.7)
     ax.axis("off")
     ax.margins(0)
-    plt.subplots_adjust(left=00, right=1, top=1, bottom=0)
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     ax.scatter(x, y, c=colours)
-    return fig
     return fig

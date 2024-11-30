@@ -4,6 +4,7 @@ import time
 import streamlit as st
 from matplotlib import pyplot as plt
 from utils.make_tree import make_tree
+from utils.utilities import get_alpha
 import requests
 import os
 
@@ -34,27 +35,26 @@ def run():
 
         def preview(effects, length: int = 5):
             with tree_fig:
+                effect_pattern = list(st.session_state.pattern["pattern"])
                 start = time.time()
-                alpha = 1
-                pattern = list(st.session_state.pattern["pattern"])
-                sparkle = 1
                 while time.time() - start < length:
-                    if effects["breathing"]:
-                        alpha = (math.sin(time.time() * 3) + 1) / 2
-                    if effects["chasing"]:
-                        last = pattern.pop(-1)
-                        pattern = [last] + pattern
-                    if effects["sparkle"]:
-                        sparkle = 5
+                    if effects["chasing"] > 0:
+                        effect_pattern.insert(0, effect_pattern[-1])
+                        effect_pattern.pop(-1)
+                    if effects["breathing"] > 0:
+                        alpha = get_alpha(effects["breathing"], time.time()-start)
+                    else:
+                        alpha = 1
                     fig = make_tree(
-                        st.session_state.n_leds, pattern, alpha=alpha, sparkle=sparkle
+                        st.session_state.n_leds, effect_pattern, alpha=alpha, sparkle=effects["sparkle"]
                     )
                     st.pyplot(
                         fig,
                         clear_figure=True,
                     )
                     plt.close(fig)
-                    time.sleep(0.02)
+                    current = time.time()-start    
+                    time.sleep(effects["chasing"] - (current % effects["chasing"]))
     time.sleep(0.05)
 
     with user_col:
@@ -137,6 +137,11 @@ def main():
     st.session_state["effects"] = st.session_state.get(
         "effects", set(st.session_state.pattern["effects"].keys())
     )
+    st.session_state["help_messages"] =  st.session_state.get("help_messages", {
+        "breathing": "Number of complete pulses to occur each second. Small values ease in and out, high values strobe quickly.",
+        "chasing": "The time in seconds it takes for the pattern to advance by one stage.",
+        "sparkle": "The approximate proportion of lights which should be randomly turned off at any given time."
+    })
     st.html("static/style.css.html")
     run()
 
