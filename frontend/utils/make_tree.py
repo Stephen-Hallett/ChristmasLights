@@ -1,5 +1,5 @@
 import math
-from random import randint
+from random import uniform
 
 from matplotlib import figure
 from matplotlib import pyplot as plt
@@ -8,8 +8,8 @@ from matplotlib.colors import to_rgb
 from .utilities import load_streamlit_config
 
 
-def get_sparkle(chance: int = 0):
-    return int(randint(0, chance) == 0)
+def get_sparkle(proportion: float = 0):
+    return int(uniform(0, 1) >= proportion)
 
 
 def make_tree(

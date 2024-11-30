@@ -53,16 +53,17 @@ def run():
                         clear_figure=True,
                     )
                     plt.close(fig)
-                    current = time.time()-start    
-                    time.sleep(effects["chasing"] - (current % effects["chasing"]))
-    time.sleep(0.05)
+                    current = time.time()-start
+                    if effects["chasing"]:
+                        time.sleep(effects["chasing"] - (current % effects["chasing"]))
+    time.sleep(0.08)
 
     with user_col:
         st.header("Pattern Menu")
         st.session_state.pattern = st.selectbox("Pattern to edit", 
                                                 options=st.session_state.patterns, 
                                                 index = st.session_state.patterns.index(st.session_state.active),
-                                                format_func = lambda x: x["name"])
+                                                format_func = lambda x: x["name"] if len(x["name"]) else "+ Create New")
 
         details_col, _, effects_col = st.columns([6, 1, 2])
         with details_col:
@@ -83,7 +84,10 @@ def run():
         with effects_col:
             st.subheader("Effects")
             for eff in st.session_state.effects:
-                current["effects"][eff] = st.number_input(eff, min_value=0 if isinstance(current["effects"][eff], int) else 0.0, value=current["effects"][eff])
+                current["effects"][eff] = st.number_input(eff, 
+                                                          min_value=0 if isinstance(current["effects"][eff], int) else 0.0, 
+                                                          value=current["effects"][eff], 
+                                                          help = st.session_state.help_messages[eff])
         st.divider()
 
         current["pattern"] = [current["pattern"][i] if i < len(current["pattern"]) else "#000000" for i in range(pattern_length)]
@@ -122,13 +126,13 @@ def main():
     st.set_page_config(layout="wide")
     # Set state variables
     st.session_state["n_leds"] = int(st.session_state.get("n_leds", os.environ.get("N_LEDS", 100)))
-    st.session_state["blank_pattern"] = st.session_state.get("blank_pattern", {"name": "New Pattern",
+    st.session_state["blank_pattern"] = st.session_state.get("blank_pattern", {"name": "",
                                                                                "pattern": ["#000000"],
                                                                                "active": False,
                                                                                "effects": {
-                                                                                   "breathing": 0,
-                                                                                   "chasing": 0,
-                                                                                   "sparkle": 0
+                                                                                   "breathing": 0.0,
+                                                                                   "chasing": 0.0,
+                                                                                   "sparkle": 0.0
                                                                                }})
     st.session_state["pattern"] = st.session_state.get(
         "pattern",

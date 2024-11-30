@@ -11,7 +11,7 @@ CREATE TABLE Effects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     breathing REAL NOT NULL,
     chasing REAL NOT NULL,
-    sparkle INTEGER NOT NULL,
+    sparkle REAL NOT NULL,
     FOREIGN KEY (id) REFERENCES Patterns(id)
 );
 

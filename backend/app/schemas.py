@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class Effects(BaseModel):
     breathing: float
     chasing: float
-    sparkle: int
+    sparkle: float
 
 
 class Pattern(BaseModel):
