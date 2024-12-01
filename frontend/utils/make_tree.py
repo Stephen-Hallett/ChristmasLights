@@ -23,9 +23,11 @@ def make_tree(
         rows.append(i * 2)
         i += 1
 
-    base_colours = (pattern * math.ceil((sum(rows) / len(pattern))))[: sum(rows)]
+    base_colours = (pattern * math.ceil(sum(rows) / len(pattern)))[: sum(rows)]
 
-    colours = [(*to_rgb(colour), get_sparkle(sparkle) * alpha) for colour in base_colours]
+    colours = [
+        (*to_rgb(colour), get_sparkle(sparkle) * alpha) for colour in base_colours
+    ]
 
     gaps = [(max(rows) - item) / 2 for item in rows]
 
@@ -39,11 +41,10 @@ def make_tree(
 
     points = points[::-1]
 
-    x, y = zip(*points)
+    x, y = zip(*points, strict=False)
 
     fig, ax = plt.subplots(
-        figsize=(6, 8),
-        facecolor=load_streamlit_config()["theme"]["backgroundColor"],
+        figsize=(6, 8), facecolor=load_streamlit_config()["theme"]["backgroundColor"]
     )
     ax.axis("off")
 

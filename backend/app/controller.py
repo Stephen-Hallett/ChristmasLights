@@ -34,11 +34,9 @@ class Controller:
         effect_item_sorted = {key: effect_item[key] for key in sorted(effect_item)}
 
         return tuple(pattern_sorted.values()), tuple(effect_item_sorted.values())
-    
+
     def _clear_active(self, cursor) -> None:
-        cursor.execute(
-            "UPDATE Patterns SET active = 0 WHERE active = 1"
-        )
+        cursor.execute("UPDATE Patterns SET active = 0 WHERE active = 1")
 
     def update_pattern(self, pattern: schemas.Pattern) -> str:
         id_val = pattern.id
@@ -50,7 +48,8 @@ class Controller:
         if active:
             self._clear_active(cursor)
         cursor.execute(
-            "UPDATE Patterns SET name = ?, pattern = ?, active = ? WHERE id = ?", (name, patt, active, id_val)
+            "UPDATE Patterns SET name = ?, pattern = ?, active = ? WHERE id = ?",
+            (name, patt, active, id_val),
         )
         cursor.execute(
             "UPDATE Effects SET breathing = ?, chasing = ?, sparkle = ? WHERE id = ?",
@@ -58,7 +57,7 @@ class Controller:
         )
         conn.commit()
         conn.close()
-        return f"Pattern \"{name}\" updated."
+        return f'Pattern "{name}" updated.'
 
     def save_pattern(self, pattern: schemas.Pattern) -> str:
         pattern_values, effect_values = self._make_db_row(pattern)
@@ -69,7 +68,8 @@ class Controller:
         if active:
             self._clear_active(cursor)
         cursor.execute(
-            "INSERT INTO Patterns (name, pattern, active) VALUES (?, ?, ?)", (name,  patt, active)
+            "INSERT INTO Patterns (name, pattern, active) VALUES (?, ?, ?)",
+            (name, patt, active),
         )
         last_id = cursor.lastrowid
         cursor.execute(
@@ -78,7 +78,7 @@ class Controller:
         )
         conn.commit()
         conn.close()
-        return f"Pattern \"{name}\" saved."
+        return f'Pattern "{name}" saved.'
 
     def list_patterns(self) -> list:
         conn = self.get_connection()
@@ -99,7 +99,7 @@ class Controller:
         res = cursor.fetchone()
         conn.close()
         return self._make_pattern_dict(res)
-    
+
     def get_active(self) -> dict:
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
@@ -110,9 +110,7 @@ class Controller:
         res = cursor.fetchone()
         if res is None:
             # If there is no active pattern, set the 'off' pattern to active.
-            cursor.execute(
-            "UPDATE Patterns SET active = 1 WHERE id = 1"
-            )
+            cursor.execute("UPDATE Patterns SET active = 1 WHERE id = 1")
             conn.commit()
             cursor.execute(
                 "SELECT * FROM (Patterns INNER JOIN Effects USING(id)) WHERE id = 1"
@@ -120,16 +118,13 @@ class Controller:
             res = cursor.fetchone()
         conn.close()
         return self._make_pattern_dict(res)
-    
+
     def turn_off(self) -> str:
         conn = self.get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         self._clear_active(cursor)
-        cursor.execute(
-            "UPDATE Patterns SET active = 1 WHERE id = 1"
-        )
+        cursor.execute("UPDATE Patterns SET active = 1 WHERE id = 1")
         conn.commit()
         conn.close()
         return "Lights are turned off"
-
