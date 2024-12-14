@@ -11,9 +11,10 @@ CREATE TABLE Effects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     breathing REAL NOT NULL,
     chasing REAL NOT NULL,
+    decibels REAL NOT NULL,
     sparkle REAL NOT NULL,
     FOREIGN KEY (id) REFERENCES Patterns(id)
 );
 
 INSERT INTO Patterns (name, pattern, active) VALUES ('Off', '["#000000"]', 1);
-INSERT INTO Effects (id, breathing, chasing, sparkle) VALUES (1, 0, 0, 0);
+INSERT INTO Effects (id, breathing, chasing, decibels, sparkle) VALUES (1, 0, 0, 0, 0);
