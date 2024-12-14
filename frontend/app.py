@@ -176,7 +176,7 @@ def main():
     )
     st.session_state["slider_values"] = st.session_state.get(
         "slider_values",
-        {"breathing": (0, 100, 1), "chasing": (0, 1000, 1), "sparkle": (0, 100, 1)},
+        {"breathing": (0, 100, 1), "chasing": (0, 500, 1), "sparkle": (0, 100, 1)},
     )
     st.html("static/style.css.html")
     run()
