@@ -5,7 +5,7 @@ import requests
 import streamlit as st
 from matplotlib import pyplot as plt
 from utils.make_tree import make_tree
-from utils.utilities import get_alpha
+from utils.utilities import effects2backend, effects2frontend, get_alpha
 
 
 def save_pattern() -> None:
@@ -38,9 +38,6 @@ def run():
     tree_col, _, user_col = st.columns([2, 1, 5])
 
     with tree_col:
-        st.session_state.n_leds = st.number_input(
-            label="LEDs: ", min_value=1, value=st.session_state.n_leds, step=1
-        )
         tree_fig = st.empty()
 
         def preview(effects: dict, length: int = 5):
@@ -81,6 +78,7 @@ def run():
         details_col, _, effects_col = st.columns([6, 1, 2])
         with details_col:
             current = st.session_state.pattern
+            ui_effects = effects2frontend(current["effects"])
             current["name"] = st.text_input("Pattern name:", value=current["name"])
             pattern_length = st.number_input(
                 label="Pattern length",
@@ -91,23 +89,24 @@ def run():
 
             st.html("<br/>")
             current["active"] = st.toggle("Activate pattern", value=current["active"])
-
         with effects_col:
             st.subheader("Effects")
             for eff in st.session_state.effects:
-                current["effects"][eff] = st.number_input(
+                ui_effects[eff] = st.slider(
                     eff,
-                    min_value=0 if isinstance(current["effects"][eff], int) else 0.0,
-                    value=current["effects"][eff],
+                    min_value=st.session_state.slider_values[eff][0],
+                    value=ui_effects[eff],
                     help=st.session_state.help_messages[eff],
+                    max_value=st.session_state.slider_values[eff][1],
+                    step=st.session_state.slider_values[eff][2],
                 )
+            current["effects"] = effects2backend(ui_effects)
         st.divider()
 
         current["pattern"] = [
             current["pattern"][i] if i < len(current["pattern"]) else "#000000"
             for i in range(pattern_length)
         ]
-
         with st.container(key="colourbox"):
             colour_cols = st.columns(pattern_length)
             for i in range(pattern_length):
@@ -170,10 +169,14 @@ def main():
     st.session_state["help_messages"] = st.session_state.get(
         "help_messages",
         {
-            "breathing": "Number of complete pulses to occur each second. Small values ease in and out, high values strobe quickly.",
-            "chasing": "The time in seconds it takes for the pattern to advance by one stage.",
+            "breathing": "Number of complete pulses to occur per minute",
+            "chasing": "Number of pattern steps per minute",
             "sparkle": "The approximate proportion of lights which should be randomly turned off at any given time.",
         },
+    )
+    st.session_state["slider_values"] = st.session_state.get(
+        "slider_values",
+        {"breathing": (0, 100, 1), "chasing": (0, 1000, 1), "sparkle": (0, 100, 1)},
     )
     st.html("static/style.css.html")
     run()

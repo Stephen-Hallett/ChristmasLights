@@ -8,6 +8,6 @@ WORKDIR /data
 
 COPY schema.sql /data/
 COPY entrypoint.sh /data/
-RUN chmod +x /data/entrypoint.sh
+RUN chmod a+rx /data/entrypoint.sh
 
 ENTRYPOINT ["/data/entrypoint.sh"]
