@@ -52,7 +52,7 @@ class Controller:
             (name, patt, active, id_val),
         )
         cursor.execute(
-            "UPDATE Effects SET breathing = ?, chasing = ?, sparkle = ? WHERE id = ?",
+            "UPDATE Effects SET breathing = ?, chasing = ?, decibels = ?, sparkle = ? WHERE id = ?",
             (*effect_values, id_val),
         )
         conn.commit()
@@ -73,7 +73,7 @@ class Controller:
         )
         last_id = cursor.lastrowid
         cursor.execute(
-            "INSERT INTO Effects (id, breathing, chasing, sparkle) VALUES (?, ?, ?, ?)",
+            "INSERT INTO Effects (id, breathing, chasing, decibels, sparkle) VALUES (?, ?, ?, ?, ?)",
             (last_id, *effect_values),
         )
         conn.commit()
