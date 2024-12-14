@@ -31,6 +31,7 @@ def effects2frontend(effects: dict) -> dict:
     chasing_val = effects.pop("chasing")
     eff["breathing"] = round(effects.pop("breathing") * 60)
     eff["chasing"] = round(60 / chasing_val) if chasing_val else 0
+    eff["decibels"] = round(effects["decibels"])
     eff["sparkle"] = round(effects.pop("sparkle") * 100)
     return eff
 
@@ -45,5 +46,6 @@ def effects2backend(effects: dict) -> dict:
     chasing_val = effects.pop("chasing")
     eff["breathing"] = effects.pop("breathing") / 60
     eff["chasing"] = 60 / chasing_val if chasing_val else 0
+    eff["decibels"] = effects["decibels"]
     eff["sparkle"] = effects.pop("sparkle") / 100
     return eff

@@ -40,12 +40,36 @@ def run():
     with tree_col:
         tree_fig = st.empty()
 
-        def preview(effects: dict, length: int = 5):
+        def preview(effects: dict, length: int = 5) -> None:
             with tree_fig:
-                effect_pattern = list(st.session_state.pattern["pattern"])
+                if effects["decibels"]:
+                    long_pattern = [
+                        col
+                        for col in st.session_state.pattern["pattern"]
+                        for _ in range(st.session_state.n_leds)
+                    ]
+                    num_starts = (
+                        st.session_state.n_leds
+                        * (len(st.session_state.pattern["pattern"]) - 1)
+                        + 1
+                    )
+                    time_till_db = length / num_starts
+                else:
+                    effect_pattern = list(st.session_state.pattern["pattern"])
                 start = time.time()
                 while time.time() - start < length:
-                    if effects["chasing"] > 0:
+                    if effects["decibels"] > 0:
+                        start_index = min(
+                            num_starts, round((time.time() - start) // time_till_db)
+                        )
+                        # start_index = math.floor(
+                        #     (current_db / effects["decibels"]) * num_starts
+                        # )
+
+                        effect_pattern = long_pattern[
+                            start_index : (start_index + st.session_state.n_leds)
+                        ][::-1]
+                    elif effects["chasing"] > 0:
                         effect_pattern.insert(0, effect_pattern[-1])
                         effect_pattern.pop(-1)
                     if effects["breathing"] > 0:
@@ -91,7 +115,14 @@ def run():
             current["active"] = st.toggle("Activate pattern", value=current["active"])
         with effects_col:
             st.subheader("Effects")
-            for eff in st.session_state.effects:
+            sound_responsive = st.toggle("Sound responsive")
+            slider_effects = set(st.session_state.effects)
+            if sound_responsive:
+                slider_effects.remove("chasing")
+            else:
+                slider_effects.remove("decibels")
+
+            for eff in slider_effects:
                 ui_effects[eff] = st.slider(
                     eff,
                     min_value=st.session_state.slider_values[eff][0],
@@ -129,7 +160,11 @@ def run():
     with tree_col:
         with tree_fig:
             fig = make_tree(
-                st.session_state.n_leds, st.session_state.pattern["pattern"], alpha=1
+                st.session_state.n_leds,
+                st.session_state.pattern["pattern"]
+                if not st.session_state.pattern["effects"]["decibels"]
+                else [st.session_state.pattern["pattern"][0]],
+                alpha=1,
             )
             st.pyplot(fig, clear_figure=True)
         _, stump, _ = st.columns([3, 4, 3])
@@ -154,7 +189,12 @@ def main():
             "name": "",
             "pattern": ["#000000"],
             "active": False,
-            "effects": {"breathing": 0.0, "chasing": 0.0, "sparkle": 0.0},
+            "effects": {
+                "breathing": 0.0,
+                "chasing": 0.0,
+                "decibels": 0.0,
+                "sparkle": 0.0,
+            },
         },
     )
     st.session_state["pattern"] = st.session_state.get(
@@ -171,12 +211,18 @@ def main():
         {
             "breathing": "Number of complete pulses to occur per minute",
             "chasing": "Number of pattern steps per minute",
+            "decibels": "The decibel value at which the pattern reaches its maximum point.",
             "sparkle": "The approximate proportion of lights which should be randomly turned off at any given time.",
         },
     )
     st.session_state["slider_values"] = st.session_state.get(
         "slider_values",
-        {"breathing": (0, 100, 1), "chasing": (0, 500, 1), "sparkle": (0, 100, 1)},
+        {
+            "breathing": (0, 100, 1),
+            "chasing": (0, 500, 1),
+            "decibels": (0, 120, 1),
+            "sparkle": (0, 100, 1),
+        },
     )
     st.html("static/style.css.html")
     run()
