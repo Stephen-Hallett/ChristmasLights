@@ -112,7 +112,11 @@ def run():
             )
 
             st.html("<br/>")
-            current["active"] = st.toggle("Activate pattern", value=current["active"])
+            active_toggle = st.toggle("Activate pattern", value=current["active"])
+            if active_toggle != current["active"]:
+                current["active"] = active_toggle
+                save_pattern()
+
         with effects_col:
             st.subheader("Effects")
             sound_responsive = st.toggle("Sound responsive")
