@@ -9,8 +9,12 @@ from utils.utilities import effects2backend, effects2frontend, get_alpha
 
 
 def save_pattern() -> None:
+    if st.session_state.soundresponsive:
+        st.session_state.pattern["effects"]["chasing"] = 0
+    else:
+        st.session_state.pattern["effects"]["decibels"] = 0
     res = requests.post(
-        f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/save",
+        f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/save",
         json=st.session_state.pattern,
     )
     if res.status_code == 200:
@@ -24,12 +28,12 @@ def save_pattern() -> None:
 def run():
     # patterns = hit backend API to retrieve from db
     st.session_state["patterns"] = requests.get(
-        f"{os.environ.get("BACKEND_URL", "http://christmascontroller.local:81")}/patterns/list"
+        f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/list"
     ).json()
     st.session_state.patterns.append(st.session_state.blank_pattern)
 
     st.session_state["active"] = requests.get(
-        f"{os.environ.get("BACKEND_URL", "http://christmascontroller.local:81")}/patterns/active"
+        f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/active"
     ).json()
 
     st.title(":christmas_tree: Christmas Lights Controller")
@@ -112,10 +116,18 @@ def run():
             )
 
             st.html("<br/>")
-            current["active"] = st.toggle("Activate pattern", value=current["active"])
+            active_toggle = st.toggle("Activate pattern", value=current["active"])
+            if active_toggle != current["active"]:
+                current["active"] = active_toggle
+                save_pattern()
+
         with effects_col:
             st.subheader("Effects")
-            sound_responsive = st.toggle("Sound responsive")
+            sound_responsive = st.toggle(
+                "Sound responsive",
+                value=current["effects"]["decibels"] > 0,
+                key="soundresponsive",
+            )
             slider_effects = set(st.session_state.effects)
             if sound_responsive:
                 slider_effects.remove("chasing")
@@ -202,7 +214,7 @@ def main():
     st.session_state["pattern"] = st.session_state.get(
         "pattern",
         requests.get(
-            f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/active"
+            f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/active"
         ).json(),
     )
     st.session_state["effects"] = st.session_state.get(

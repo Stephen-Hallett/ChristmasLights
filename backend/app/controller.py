@@ -56,6 +56,10 @@ class Controller:
             (*effect_values, id_val),
         )
         conn.commit()
+        cursor.execute("SELECT COUNT(*) FROM Patterns WHERE active = 1")
+        active_count = cursor.fetchone()[0]
+        if not active_count:
+            cursor.execute("UPDATE Patterns SET active = 1 WHERE id = 1")
         conn.close()
         return f'Pattern "{name}" updated.'
 
