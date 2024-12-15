@@ -24,15 +24,15 @@ def save_pattern() -> None:
 def run():
     # patterns = hit backend API to retrieve from db
     st.session_state["patterns"] = requests.get(
-        f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/list"
+        f"{os.environ.get("BACKEND_URL", "http://christmascontroller.local:81")}/patterns/list"
     ).json()
     st.session_state.patterns.append(st.session_state.blank_pattern)
 
     st.session_state["active"] = requests.get(
-        f"{os.environ.get("BACKEND_URL", "http://localhost:80")}/patterns/active"
+        f"{os.environ.get("BACKEND_URL", "http://christmascontroller.local:81")}/patterns/active"
     ).json()
 
-    st.title("Christmas Lights Controller")
+    st.title(":christmas_tree: Christmas Lights Controller")
     st.divider()
 
     tree_col, _, user_col = st.columns([2, 1, 5])
@@ -178,7 +178,9 @@ def run():
 
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config(
+        layout="wide", page_icon=":christmas_tree:", page_title="Christmas Controller"
+    )
     # Set state variables
     st.session_state["n_leds"] = int(
         st.session_state.get("n_leds", os.environ.get("N_LEDS", 100))
