@@ -106,7 +106,7 @@ def run():
         details_col, _, effects_col = st.columns([6, 1, 2])
         with details_col:
             current = st.session_state.pattern
-            ui_effects = effects2frontend(current["effects"])
+            ui_effects = effects2frontend(dict(current["effects"]))
             current["name"] = st.text_input("Pattern name:", value=current["name"])
             pattern_length = st.number_input(
                 label="Pattern length",
