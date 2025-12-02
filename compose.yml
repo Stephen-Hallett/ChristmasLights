@@ -44,9 +44,24 @@ services:
       - ./frontend:/frontend/
     environment:
       - BACKEND_URL=http://backend:81
-      - N_LEDS=100
+      - N_LEDS=50
     ports:
       - "8501:8501"
+
+  client:
+    container_name: Client
+    depends_on:
+      backend:
+        condition: service_started
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    networks:
+      - mynet
+    environment:
+      - BACKEND_URL=http://backend:81
+      - N_LEDS=50
+
 volumes:
   data:
 
