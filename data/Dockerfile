@@ -1,8 +1,6 @@
-FROM ubuntu:oracular
+FROM alpine:3.19
 
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get install -y sqlite3 libsqlite3-dev
+RUN apk add --no-cache sqlite
 
 WORKDIR /data
 
