@@ -8,6 +8,46 @@ from utils.make_tree import make_tree
 from utils.utilities import effects2backend, effects2frontend, get_alpha
 
 
+def set_state() -> None:
+    if "n_leds" not in st.session_state:
+        st.session_state.n_leds = os.environ.get("N_LEDS", 100)
+    if "blank_pattern" not in st.session_state:
+        st.session_state.blank_pattern = {
+                "name": "",
+                "pattern": ["#000000"],
+                "active": False,
+                "effects": {
+                    "breathing": 0.0,
+                    "chasing": 0.0,
+                    "decibels": 0.0,
+                    "sparkle": 0.0,
+                },
+            }
+    if "pattern" not in st.session_state:
+        st.session_state.pattern = requests.get(
+            f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/active"
+        ).json()
+    if "effects" not in st.session_state:
+        st.session_state.effects = set(st.session_state.pattern["effects"].keys())
+    if "help_messages" not in st.session_state:
+        st.session_state.help_messages = {
+            "breathing": "Number of complete pulses to occur per minute",
+            "chasing": "Number of pattern steps per minute",
+            "decibels": "The decibel value at which the pattern reaches its maximum point.",
+            "sparkle": "The approximate proportion of lights which should be randomly turned off at any given time.",
+        }
+    if "slider_values" not in st.session_state:
+        st.session_state.slider_values =  {
+            "breathing": (0, 100, 1),
+            "chasing": (0, 500, 1),
+            "decibels": (0, 120, 1),
+            "sparkle": (0, 100, 1),
+        }
+
+def make_colour_callback(idx: int, key: str) -> callable:
+    new_colour = st.session_state[key]
+    st.session_state.pattern["pattern"][idx] = new_colour
+
 def save_pattern() -> None:
     if st.session_state.soundresponsive:
         st.session_state.pattern["effects"]["chasing"] = 0
@@ -27,12 +67,12 @@ def save_pattern() -> None:
 
 def run():
     # patterns = hit backend API to retrieve from db
-    st.session_state["patterns"] = requests.get(
+    st.session_state.patterns = requests.get(
         f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/list"
     ).json()
     st.session_state.patterns.append(st.session_state.blank_pattern)
 
-    st.session_state["active"] = requests.get(
+    st.session_state.active = requests.get(
         f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/active"
     ).json()
 
@@ -67,7 +107,7 @@ def run():
                             num_starts, round((time.time() - start) // time_till_db)
                         )
                         # start_index = math.floor(
-                        #     (current_db / effects["decibels"]) * num_starts
+                        #     (st.session_state.pattern_db / effects["decibels"]) * num_starts
                         # )
 
                         effect_pattern = long_pattern[
@@ -88,9 +128,9 @@ def run():
                     )
                     st.pyplot(fig, clear_figure=True)
                     plt.close(fig)
-                    current = time.time() - start
+                    st.session_state.pattern = time.time() - start
                     if effects["chasing"]:
-                        time.sleep(effects["chasing"] - (current % effects["chasing"]))
+                        time.sleep(effects["chasing"] - (st.session_state.pattern % effects["chasing"]))
 
     time.sleep(0.08)
 
@@ -102,30 +142,34 @@ def run():
             index=st.session_state.patterns.index(st.session_state.active),
             format_func=lambda x: x["name"] if len(x["name"]) else "+ Create New",
         )
+        print(st.session_state.pattern)
+        for key in list(st.session_state.keys()):
+            if key.startswith("pattern_colour"):
+                del st.session_state[key]
+
 
         details_col, _, effects_col = st.columns([6, 1, 2])
         with details_col:
-            current = st.session_state.pattern
-            ui_effects = effects2frontend(dict(current["effects"]))
-            current["name"] = st.text_input("Pattern name:", value=current["name"])
+            ui_effects = effects2frontend(dict(st.session_state.pattern["effects"]))
+            st.session_state.pattern["name"] = st.text_input("Pattern name:", value=st.session_state.pattern["name"])
             pattern_length = st.number_input(
                 label="Pattern length",
                 min_value=1,
                 max_value=st.session_state.n_leds,
-                value=len(current["pattern"]),
+                value=len(st.session_state.pattern["pattern"]),
             )
 
             st.html("<br/>")
-            active_toggle = st.toggle("Activate pattern", value=current["active"])
-            if active_toggle != current["active"]:
-                current["active"] = active_toggle
+            active_toggle = st.toggle("Activate pattern", value=st.session_state.pattern["active"])
+            if active_toggle != st.session_state.pattern["active"]:
+                st.session_state.pattern["active"] = active_toggle
                 save_pattern()
 
         with effects_col:
             st.subheader("Effects")
             sound_responsive = st.toggle(
                 "Sound responsive",
-                value=current["effects"]["decibels"] > 0,
+                value=st.session_state.pattern["effects"]["decibels"] > 0,
                 key="soundresponsive",
             )
             slider_effects = set(st.session_state.effects)
@@ -143,27 +187,30 @@ def run():
                     max_value=st.session_state.slider_values[eff][1],
                     step=st.session_state.slider_values[eff][2],
                 )
-            current["effects"] = effects2backend(ui_effects)
+            st.session_state.pattern["effects"] = effects2backend(ui_effects)
         st.divider()
 
-        current["pattern"] = [
-            current["pattern"][i] if i < len(current["pattern"]) else "#000000"
+        st.session_state.pattern["pattern"] = [
+            st.session_state.pattern["pattern"][i] if i < len(st.session_state.pattern["pattern"]) else "#000000"
             for i in range(pattern_length)
         ]
         with st.container(key="colourbox"):
             colour_cols = st.columns(pattern_length)
-            for i in range(pattern_length):
-                with colour_cols[i]:
-                    current["pattern"][i] = st.color_picker(
-                        label=" ",
-                        label_visibility="hidden",
-                        key=f"pattern_colour{i}",
-                        value=current["pattern"][i],
-                    )
+            for i in range(len(st.session_state.pattern["pattern"])):
+                pid = st.session_state.pattern.get("id", "new")
+                colour_key = f"pattern_colour_{pid}_{i}"
+                colour_cols[i].color_picker(
+                   " ",
+                    value=st.session_state.pattern["pattern"][i],
+                    label_visibility="hidden",
+                    key=colour_key,
+                    on_change=make_colour_callback,
+                    args=(i, colour_key),
+                )
         st.divider()
 
         st.button(
-            f"{'Update' if 'id' in current else 'Save'} pattern",
+            f"{'Update' if 'id' in st.session_state.pattern else 'Save'} pattern",
             use_container_width=True,
             type="primary",
             on_click=save_pattern,
@@ -184,7 +231,7 @@ def run():
             st.button(
                 "Preview",
                 on_click=preview,
-                args=(current["effects"], 5),
+                args=(st.session_state.pattern["effects"], 5),
                 use_container_width=True,
             )
 
@@ -194,53 +241,12 @@ def main():
         layout="wide", page_icon=":christmas_tree:", page_title="Christmas Controller"
     )
     # Set state variables
-    st.session_state["n_leds"] = int(
-        st.session_state.get("n_leds", os.environ.get("N_LEDS", 100))
-    )
-    st.session_state["blank_pattern"] = st.session_state.get(
-        "blank_pattern",
-        {
-            "name": "",
-            "pattern": ["#000000"],
-            "active": False,
-            "effects": {
-                "breathing": 0.0,
-                "chasing": 0.0,
-                "decibels": 0.0,
-                "sparkle": 0.0,
-            },
-        },
-    )
-    st.session_state["pattern"] = st.session_state.get(
-        "pattern",
-        requests.get(
-            f"{os.environ.get("BACKEND_URL", "http://localhost:81")}/patterns/active"
-        ).json(),
-    )
-    st.session_state["effects"] = st.session_state.get(
-        "effects", set(st.session_state.pattern["effects"].keys())
-    )
-    st.session_state["help_messages"] = st.session_state.get(
-        "help_messages",
-        {
-            "breathing": "Number of complete pulses to occur per minute",
-            "chasing": "Number of pattern steps per minute",
-            "decibels": "The decibel value at which the pattern reaches its maximum point.",
-            "sparkle": "The approximate proportion of lights which should be randomly turned off at any given time.",
-        },
-    )
-    st.session_state["slider_values"] = st.session_state.get(
-        "slider_values",
-        {
-            "breathing": (0, 100, 1),
-            "chasing": (0, 500, 1),
-            "decibels": (0, 120, 1),
-            "sparkle": (0, 100, 1),
-        },
-    )
-    st.html("static/style.css.html")
+    
     run()
 
 
 if __name__ == "__main__":
+    with open("style.css") as f:
+        st.html(f"<style>{f.read()}</style>")
+    set_state()
     main()

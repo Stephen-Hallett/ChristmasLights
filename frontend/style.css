@@ -1,0 +1,44 @@
+.st-key-colourbox {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.st-key-colourbox .stColorPicker {
+  flex-direction: row;
+  justify-content: center;
+}
+
+.st-key-stump_button button {
+  background-color: #895129 !important;
+}
+
+.st-key-stump_button button:hover,
+.st-key-stump_button button:active,
+.st-key-stump_button button:focus:not(:active) {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-baseweb="checkbox"] [data-testid="stWidgetLabel"] p {
+  /* Styles for the label text for checkbox and toggle */
+  font-size: 1.5rem;
+  width: 300px;
+  margin-top: 0.5rem;
+}
+
+[data-baseweb="checkbox"] div {
+  /* Styles for the slider container */
+  height: 2rem;
+  width: 3rem;
+}
+[data-baseweb="checkbox"] div div {
+  /* Styles for the slider circle */
+  height: 1.8rem;
+  width: 1.8rem;
+}
+[data-testid="stCheckbox"] label span {
+  /* Styles the checkbox */
+  height: 4rem;
+  width: 4rem;
+}
