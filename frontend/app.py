@@ -10,7 +10,7 @@ from utils.utilities import effects2backend, effects2frontend, get_alpha
 
 def set_state() -> None:
     if "n_leds" not in st.session_state:
-        st.session_state.n_leds = os.environ.get("N_LEDS", 100)
+        st.session_state.n_leds = int(os.environ.get("N_LEDS", 100))
     if "blank_pattern" not in st.session_state:
         st.session_state.blank_pattern = {
                 "name": "",
