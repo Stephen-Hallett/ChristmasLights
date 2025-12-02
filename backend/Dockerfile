@@ -7,4 +7,4 @@ RUN uv sync --locked
 
 EXPOSE 81
 
-CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "81"]
+CMD ["uv", "run", "fastapi", "run", "app", "--port", "81"]
