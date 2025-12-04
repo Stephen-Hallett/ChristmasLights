@@ -29,6 +29,7 @@ services:
       - DATABASE_PATH=/data/app.db
     ports:
       - "81:81"
+    restart: unless-stopped
 
   frontend:
     container_name: Streamlit
@@ -44,9 +45,9 @@ services:
       - ./frontend:/frontend/
     environment:
       - BACKEND_URL=http://backend:81
-      - N_LEDS=50
     ports:
       - "8501:8501"
+    restart: unless-stopped
 
   client:
     container_name: Client
@@ -60,7 +61,7 @@ services:
       - mynet
     environment:
       - BACKEND_URL=http://backend:81
-      - N_LEDS=50
+    restart: unless-stopped
 
 volumes:
   data:
