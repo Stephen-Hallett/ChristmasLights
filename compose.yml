@@ -67,10 +67,12 @@ services:
       - ALSA_DEVICE=${ALSA_DEVICE}
     devices:
       - /dev/snd:/dev/snd
+      - /dev/gpiomem:/dev/gpiomem
     group_add:
       - audio
     volumes:
       - /dev/bus/usb:/dev/bus/usb
+    privileged: true
     restart: unless-stopped
 
 volumes:
