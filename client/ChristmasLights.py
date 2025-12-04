@@ -96,9 +96,10 @@ class ChristmasLights(PixelStrip):
             return Color(0, 0, 0)
         # Apply breathing
         rgb = tuple([round(val * self.alpha) for val in rgb])
+        r, g, b = rgb
         if not self.swap_rgb:
-            return Color(*rgb)
-        return Color(rgb[2], rgb[1], rgb[0])
+            return Color(g, b, r)
+        return Color(r, b, g)
 
     def setStrip(self):
         if not self.decibels:
