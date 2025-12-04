@@ -61,7 +61,7 @@ class ChristmasLights(PixelStrip):
 
     def _hex2rgb(self, hexcode: str) -> tuple[int, int, int]:
         code = hexcode.lstrip("#")
-        return tuple(int(code[i : i + 2], 16) for i in (2, 0, 4))
+        return tuple(int(code[i : i + 2], 16) for i in (0, 2, 4))
 
     def setPattern(self, pattern: dict) -> None:
         logging.info(f"Changing pattern to {pattern['name']}")
