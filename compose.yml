@@ -45,6 +45,7 @@ services:
       - ./frontend:/frontend/
     environment:
       - BACKEND_URL=http://backend:81
+      - N_LEDS=${N_LEDS}
     ports:
       - "8501:8501"
     restart: unless-stopped
@@ -61,6 +62,9 @@ services:
       - mynet
     environment:
       - BACKEND_URL=http://backend:81
+      - N_LEDS=${N_LEDS}
+      - ALSA_CARD=${ALSA_CARD}
+      - ALSA_DEVICE=${ALSA_DEVICE}
     devices:
       - /dev/snd:/dev/snd
     group_add:
