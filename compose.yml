@@ -61,6 +61,12 @@ services:
       - mynet
     environment:
       - BACKEND_URL=http://backend:81
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
     restart: unless-stopped
 
 volumes:

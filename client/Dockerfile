@@ -18,7 +18,12 @@ WORKDIR /client
 # Prefer uv-managed dependencies if pyproject+lock present, otherwise fall back to requirements.txt
 RUN uv sync --locked
 
-ENV PYTHONUNBUFFERED=1
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Default runtime
+ENV PYTHONUNBUFFERED=1
+ENV ALSA_CARD=0
+ENV ALSA_DEVICE=0
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["uv", "run", "python", "ChristmasClient.py"]
