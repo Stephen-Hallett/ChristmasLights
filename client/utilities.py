@@ -1,7 +1,7 @@
 import math
+import os
 
 import requests
-import os
 
 IP_ADDRESS = "192.168.1.40:81"
 
@@ -15,7 +15,7 @@ def getPattern() -> dict:
         "effects": {"breathing": 0, "chasing": 0.09, "sparkle": 0, "decibels": 0},
     }
     try:
-        res = requests.get(f"http://{os.environ['BACKEND_URL']}/patterns/active")
+        res = requests.get(f"{os.environ['BACKEND_URL']}/patterns/active")
         if res.status_code == 200:  # NOQA
             return res.json()
     except:
