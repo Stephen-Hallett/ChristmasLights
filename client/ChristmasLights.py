@@ -1,4 +1,5 @@
 import logging
+import os
 from collections import deque
 from math import ceil
 from queue import Queue
@@ -19,7 +20,9 @@ class ChristmasLights(PixelStrip):
         self.decibels: float = 0  # Maximum decibels for pattern
         self.pattern: list = ["#FFFFFF"]
         self.num_starts = 1
-        self.active = list(range(100))  # TODO: Find led var name
+        self.led_count = int(os.environ["N_LEDS"])
+        self.active = list(range(self.led_count))
+        self.swap_rgb = int(os.environ["SWAP_RGB"])
 
         # Set up audio device
         FORMAT = pyaudio.paInt16
@@ -68,17 +71,11 @@ class ChristmasLights(PixelStrip):
         self.breathing = pattern["effects"]["breathing"]
         self.decibels = pattern["effects"]["decibels"]
         self.alpha = 1
-        self.active = list(range(100))  # TODO: Find led var name
-        self.num_starts = (
-            100  # TODO: Find led var name
-            * (len(self.pattern) - 1)
-            + 1
-        )
+        self.active = list(range(self.led_count))
+        self.num_starts = self.led_count * (len(self.pattern) - 1) + 1
         if self.decibels:
             self.long_pattern = [
-                col
-                for col in self.pattern
-                for _ in range(100)  # This is the LED count TODO: Find var name
+                col for col in self.pattern for _ in range(self.led_count)
             ]
             self.start_index = 0
 
@@ -99,7 +96,9 @@ class ChristmasLights(PixelStrip):
             return Color(0, 0, 0)
         # Apply breathing
         rgb = tuple([round(val * self.alpha) for val in rgb])
-        return Color(*rgb)
+        if not self.swap_rgb:
+            return Color(*rgb)
+        return Color(rgb[2], rgb[1], rgb[0])
 
     def setStrip(self):
         if not self.decibels:

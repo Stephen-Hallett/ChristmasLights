@@ -65,6 +65,7 @@ services:
       - N_LEDS=${N_LEDS}
       - ALSA_CARD=${ALSA_CARD}
       - ALSA_DEVICE=${ALSA_DEVICE}
+      - SWAP_RGB=${SWAP_RGB}
     devices:
       - /dev/snd:/dev/snd
       - /dev/gpiomem:/dev/gpiomem
