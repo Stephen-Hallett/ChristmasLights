@@ -32,7 +32,7 @@ class ChristmasLights(PixelStrip):
         CHUNK = round(RATE / CHUNKS_PER_SECOND)
 
         self.q = Queue()
-        self.buffer = deque(maxlen=1)
+        self.buffer = deque(maxlen=3)
         self.stream = pyaudio.PyAudio().open(
             format=FORMAT,
             channels=CHANNELS,
@@ -49,7 +49,7 @@ class ChristmasLights(PixelStrip):
         rms = np.sqrt(np.mean(sig**2))  # Root Mean Square
         if rms > 0.01:
             try:
-                return (max(20 * np.log10(rms), 0) - 21) ** 1.5  # Convert to dB
+                return (max(20 * np.log10(rms), 0) - 24) ** 1.5  # Convert to dB
             except:
                 return 0
         return 0  # Handle silence
