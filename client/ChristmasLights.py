@@ -22,7 +22,7 @@ class ChristmasLights(PixelStrip):
         self.num_starts = 1
         self.led_count = int(os.environ["N_LEDS"])
         self.active = list(range(self.led_count))
-        self.swap_rgb = int(os.environ["SWAP_RGB"])
+        self.colour_mode = int(os.environ["COLOUR_MODE"])
 
         # Set up audio device
         FORMAT = pyaudio.paInt16
@@ -97,9 +97,13 @@ class ChristmasLights(PixelStrip):
         # Apply breathing
         rgb = tuple([round(val * self.alpha) for val in rgb])
         r, g, b = rgb
-        if not self.swap_rgb:
-            return Color(g, b, r)
-        return Color(r, b, g)
+        match self.colour_mode:
+            case 0:
+                return Color(g, b, r)
+            case 1:
+                return Color(g, r, b)
+            case _:
+                return Color(r, b, g)
 
     def setStrip(self):
         if not self.decibels:
