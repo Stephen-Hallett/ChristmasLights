@@ -33,14 +33,23 @@ class ChristmasLights(PixelStrip):
 
         self.q = Queue()
         self.buffer = deque(maxlen=3)
-        self.stream = pyaudio.PyAudio().open(
-            format=FORMAT,
-            channels=CHANNELS,
-            rate=RATE,
-            input=True,
-            stream_callback=self._callback,
-            frames_per_buffer=CHUNK,
-        )
+        try:
+            self.stream = pyaudio.PyAudio().open(
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK,
+            )
+            self.audio_enabled = True
+            print("Audio input initialized successfully")
+        except OSError as e:
+            print(f"Warning: Could not initialize audio input: {e}")
+            print(
+                "Running without audio input - lights will work without audio reactivity"
+            )
+            self.stream = None
+            self.audio_enabled = False
 
     def _calculate_db(self, sig):
         """
@@ -83,6 +92,8 @@ class ChristmasLights(PixelStrip):
         return uniform(0, 1) >= self.sparkle  # NOQA
 
     def getSound(self) -> float:
+        if not self.audio_enabled:
+            return 0
         while not self.q.empty():
             self.buffer.append(self.q.get())
         if self.buffer:
@@ -111,8 +122,8 @@ class ChristmasLights(PixelStrip):
                 : self.numPixels()
             ]
         else:
-            full_pattern = self.long_pattern[self.start_index : self.start_index + 100][
-                ::-1
-            ]  # TODO: Find var name
+            full_pattern = self.long_pattern[
+                self.start_index : self.start_index + self.led_count
+            ][::-1]
         for i, pix in enumerate(full_pattern):
             self[i] = self.getNewValue(pix, i)
